@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "ebraamemad", email = "beboe668@gmail.com"},
 ]
-dependencies = ["pillow>=11.2.1"]
+dependencies = ["fastapi>=0.115.12", "uvicorn>=0.34.2", "pillow>=11.2.1", "python-multipart>=0.0.20", "numpy>=2.2.6", "pandas>=2.2.3", "scikit-learn>=1.6.1", "tqdm>=4.67.1", "torch>=2.7.0", "torchvision>=0.22.0"]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "MIT"}
@@ -14,3 +14,8 @@ license = {text = "MIT"}
 [tool.pdm]
 distribution = false
 
+[dependency-groups]
+dev = [
+    "mlflow>=2.22.0",
+    "ipykernel>=6.29.5",
+]
