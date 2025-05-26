@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "ebraamemad", email = "beboe668@gmail.com"},
 ]
-dependencies = []
+dependencies = ["pillow>=11.2.1"]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "MIT"}
@@ -14,7 +14,3 @@ license = {text = "MIT"}
 [tool.pdm]
 distribution = false
 
-[dependency-groups]
-dependencies = [
-    "pillow>=11.2.1",
-]
