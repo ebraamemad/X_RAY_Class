@@ -3,3 +3,4 @@ load_data/
 cnn_model.pth
 # Ignore the PyTorch model file
 DenseNet121.pth
+data/
