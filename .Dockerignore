@@ -9,3 +9,7 @@ __pycache__/
 .gitignore
 Dockerfile
 # Ignore Dockerfile
+# تجاهل ملفات النظام
+*.pyc
+*.pyo
+*.log
