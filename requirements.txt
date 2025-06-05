@@ -1,7 +1,9 @@
 fastapi
 uvicorn[standard]
-torch==2.7.1+cpu
-torchvision==0.22.1+cpu
+torch==2.7.1
+torchvision==0.22.1
+numpy
+requests
 Pillow
 pandas
 scikit-learn
