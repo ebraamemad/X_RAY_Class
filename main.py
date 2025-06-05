@@ -26,7 +26,7 @@ def load_model():
     
     try:
         # Load your trained model
-        model_path = "resnet_model.pth"  # غير المسار حسب مكان النموذج عندك
+        model_path = "resnet_model.pth" 
         
         model = ResNetModel()
         model.load_state_dict(torch.load(model_path, map_location=device))
