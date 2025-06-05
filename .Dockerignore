@@ -1,0 +1,11 @@
+mlruns/
+load_data/
+cnn_model.pth
+# Ignore the PyTorch model file
+DenseNet121.pth
+notebook/
+__pycache__/
+# Ignore Python cache files
+.gitignore
+Dockerfile
+# Ignore Dockerfile
