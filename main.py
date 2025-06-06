@@ -22,6 +22,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 @app.on_event("startup")
 def load_model():
     """Load the trained model on startup"""
+    
     global model, transform
     
     try:

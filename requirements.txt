@@ -1,7 +1,7 @@
 fastapi
 uvicorn[standard]
-torch==2.7.1
-torchvision==0.22.1
+torch==2.6.0
+torchvision==0.17.0
 numpy
 requests
 Pillow
