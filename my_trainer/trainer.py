@@ -34,11 +34,9 @@ class PneumoniaTrainer:
         self.train_loader = None
         self.val_loader = None
         self.test_loader = None
-        self.class_weights = None  # هنخليها class_weights عشان انت متعود عليها
+        self.class_weights = None  
 
     def load_data(self):
-        """تحميل البيانات مع إصلاح مسارات الصور تلقائياً"""
-        # الحصول على الكاش العالمي للصور (هيحل مشكلة المسارات)
         image_cache = get_global_image_cache()
         
         df = pd.read_csv(self.data_map_path)
@@ -46,7 +44,6 @@ class PneumoniaTrainer:
         val_df = df[df['split'] == 'val']
         test_df = df[df['split'] == 'test']
         
-        # إنشاء datasets مع الكاش المشترك
         train_dataset = ChestXrayDataset(train_df, transform=self.train_transform, image_cache=image_cache)
         val_dataset = ChestXrayDataset(val_df, transform=self.test_transform, image_cache=image_cache)
         test_dataset = ChestXrayDataset(test_df, transform=self.test_transform, image_cache=image_cache)
@@ -57,13 +54,11 @@ class PneumoniaTrainer:
         # حساب pos_weight (زي ما انت عامل)
         self.class_weights = torch.tensor(class_counts[0] / class_counts[1], dtype=torch.float)
         
-        # حساب sample weights للـ WeightedRandomSampler
         sample_class_weights = 1. / torch.tensor(class_counts, dtype=torch.float)
         sample_weights = sample_class_weights[[1 if label == 'PNEUMONIA' else 0 for label in labels]]
 
         sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
 
-        # إنشاء DataLoaders مع num_workers=0 لتجنب مشاكل Windows
         self.train_loader = DataLoader(train_dataset, batch_size=self.batch_size, sampler=sampler, num_workers=0)
         self.val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
         self.test_loader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False, num_workers=0)
@@ -73,7 +68,6 @@ class PneumoniaTrainer:
         print(f"pos_weight: {self.class_weights}")
 
     def evaluate(self, model, dataloader, criterion):
-        """تقييم النموذج - تم إصلاح مشكلة predictions"""
         model.eval()
         running_loss = 0.0
         running_corrects = 0
@@ -85,18 +79,17 @@ class PneumoniaTrainer:
                 inputs = inputs.to(self.device)
                 labels = labels.float().unsqueeze(1).to(self.device)
 
-                outputs = model(inputs)  # logits
+                outputs = model(inputs)  
                 loss = criterion(outputs, labels)
 
                 running_loss += loss.item() * inputs.size(0)
                 
-                # إصلاح المشكلة: استخدام probabilities للتنبؤ
                 probs = torch.sigmoid(outputs)
                 preds = torch.round(probs)
                 running_corrects += torch.sum(preds == labels.data)
 
                 all_labels.extend(labels.cpu().numpy())
-                all_probs.extend(probs.cpu().numpy())  # استخدام probabilities
+                all_probs.extend(probs.cpu().numpy()) 
                 
         loss = running_loss / len(dataloader.dataset)
         acc = running_corrects.double() / len(dataloader.dataset)
@@ -116,7 +109,6 @@ class PneumoniaTrainer:
 
             optimizer = optim.Adam(model.parameters(), lr=self.lr)
             
-            # تسجيل parameters في mlflow
             mlflow.log_params({
                 "batch_size": self.batch_size,
                 "lr": self.lr,
@@ -167,10 +159,8 @@ class PneumoniaTrainer:
                     best_val_auc = val_auc
                     torch.save(model.state_dict(), best_model_path)
 
-            # Log best model
             mlflow.pytorch.log_model(model, "model")
 
-            # Evaluate on test set
             model.load_state_dict(torch.load(best_model_path))
             test_loss, test_acc, test_auc = self.evaluate(model, self.test_loader, criterion)
             print(f"Test Results — Loss: {test_loss:.4f} | Acc: {test_acc:.4f} | AUC: {test_auc:.4f}")

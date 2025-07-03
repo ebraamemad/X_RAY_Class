@@ -7,11 +7,10 @@ from pathlib import Path
 
 class ChestXrayDataset(Dataset):
     def __init__(self, dataframe, transform=None, image_cache=None):
-        self.dataframe = dataframe.copy() #سخة من البيانات
+        self.dataframe = dataframe.copy() 
         self.transform = transform
         self.image_cache = image_cache or {}
         
-        # Build image cache if not provided
         if not self.image_cache:
             self._build_image_cache()
         
@@ -19,25 +18,20 @@ class ChestXrayDataset(Dataset):
         self._fix_dataframe_paths()
     
     def _build_image_cache(self):
-        """Build a cache of filename -> full_path mappings"""
         print("Building image cache...")
         image_extensions = ['.jpeg', '.jpg', '.png', '.JPEG', '.JPG', '.PNG']
         
-        # Search for all image files recursively
         for root, dirs, files in os.walk('.'):
-            # Skip hidden directories and common non-image directories
             dirs[:] = [d for d in dirs if not d.startswith('.') and d not in ['__pycache__', 'mlruns', '.git']]
             
             for file in files:
                 if any(file.endswith(ext) for ext in image_extensions):
                     full_path = os.path.join(root, file)
-                    # Store both the filename and the full path
                     self.image_cache[file] = full_path
         
         print(f"Found {len(self.image_cache)} images in cache")
     
     def _fix_dataframe_paths(self):
-        """Fix the paths in the dataframe using the image cache"""
         corrected_paths = []
         found_count = 0
         
@@ -45,11 +39,9 @@ class ChestXrayDataset(Dataset):
             original_path = row['resized']
             filename = os.path.basename(original_path)
             
-            # Check if file exists at original path
             if os.path.exists(original_path):
                 corrected_paths.append(original_path)
                 found_count += 1
-            # Check if file exists in cache
             elif filename in self.image_cache:
                 corrected_paths.append(self.image_cache[filename])
                 found_count += 1
@@ -85,7 +77,6 @@ class ChestXrayDataset(Dataset):
             print(f"Error loading image {img_path}: {e}")
             raise e
 
-# Global image cache to share between datasets
 _global_image_cache = None
 
 def get_global_image_cache():
@@ -108,34 +99,3 @@ def get_global_image_cache():
     
     return _global_image_cache
 
-# ================ شرح فئة ChestXrayDataset ================
-# 1. المهمة الرئيسية:
-# - تحميل صور أشعة الصدر وتجهيزها للتدريب مع إدارة المسارات تلقائياً
-
-# 2. الميزات الرئيسية:
-# • نظام كاش ذكي: يحفظ مسارات الصور لتجنب البحث المتكرر
-# • تصحيح تلقائي: يصلح مسارات الصور المعطوبة في DataFrame
-# • دعم التحويلات: تطبيق augmentations على الصور
-# • معالجة الأخطاء: اكتشاف المشاكل في تحميل الصور
-
-# 3. كيفية الاستخدام الأساسي:
-# ```
-# from dataset import ChestXrayDataset
-# dataset = ChestXrayDataset(dataframe, transform=my_transforms)
-# ```
-
-# 4. مكونات الكاش:
-# • يخزن {اسم_الملف: المسار_الكامل}
-# • يبني خريطة كاملة للملفات عند التشغيل الأول
-# • يمكن مشاركته بين عدة كائنات Dataset
-
-# 5. إصلاح المسارات:
-# - يصحح المسارات في العمود 'resized' تلقائياً
-# - يستخدم الكاش للعثور على أحدث مسار للصور
-# - يحتفظ بالمسار الأصلي إذا لم يجد بديل
-
-# 6. ملاحظات أداء:
-# ✓ يقلل وقت التحميل بإعادة استخدام المسارات
-# ✓ يتجنب فحص الملفات في كل مرة
-# ✓ يحذر من الملفات المفقودة
-# =====================================================
