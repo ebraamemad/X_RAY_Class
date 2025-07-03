@@ -80,7 +80,6 @@ class ChestXrayDataset(Dataset):
 _global_image_cache = None
 
 def get_global_image_cache():
-    """Get or create global image cache"""
     global _global_image_cache
     if _global_image_cache is None:
         _global_image_cache = {}
